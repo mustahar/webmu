@@ -1,4 +1,4 @@
-name: Build WebToAPK
+name: Build Website to APK
 
 on:
   push:
@@ -10,32 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install WebIntoApp / PWABuilder CLI
-        run: npx @bubblewrap/cli init --manifest="https://masmu.sch.id/manifest.json" || true
-
-      - name: Build APK with Website-2-APK Tool
-        uses: jmartinez/web2apk-action@v1
+      - name: Build Web-to-APK
+        uses: GearS3/web-to-apk-action@v1
         with:
           url: 'https://masmu.sch.id/'
           app_name: 'MASMU Mobile'
           package_name: 'id.sch.masmu.app'
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: MASMU-App-APK
+          name: MASMU-APK
           path: '**/*.apk'
