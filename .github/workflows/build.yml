@@ -1,0 +1,59 @@
+name: Build Android Webview APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js & Cordova / Capacitor
+        run: |
+          npm install -g cordova
+
+      - name: Create Cordova Project
+        run: |
+          cordova create masmu_app com.masmu.app "MASMU Mobile"
+          cd masmu_app
+          cordova platform add android
+
+      - name: Inject Webview Redirect
+        run: |
+          cat <<EOF > masmu_app/www/index.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta http-equiv="refresh" content="0; url=https://masmu.sch.id/">
+              <script type="text/javascript">
+                  window.location.href = "https://masmu.sch.id/";
+              </script>
+          </head>
+          <body>
+              <p>Membuka MASMU Mobile...</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Build Android APK
+        run: |
+          cd masmu_app
+          cordova build android --debug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MASMU-App-Debug
+          path: masmu_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
